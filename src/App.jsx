@@ -20,12 +20,6 @@ function App() {
       key = urlParams.get("access_key") || urlParams.get("key") || "";
     }
 
-    // If no key is found and the user is at the base URL, redirect to https://tpipay.ai
-    if (!key && (window.location.pathname === "/" || window.location.pathname === "")) {
-      window.location.href = "https://tpipay.ai";
-      return;
-    }
-
     // Fallback for testing/sandbox if no key is provided
     if (!key) {
       key = "TEST_SESSION_KEY";
@@ -48,4 +42,4 @@ function App() {
   return <CheckoutPage accessKey={accessKey} />;
 }
 
-export default App;
+export default App;
