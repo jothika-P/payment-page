@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { fetchSession, processPayment } from "./services/paymentService";
-import { QRCodeSVG } from "qrcode.react";
 
 const ENABLE_NETBANKING = import.meta.env.VITE_ENABLE_NETBANKING === "true";
 const ENABLE_CARDS = import.meta.env.VITE_ENABLE_CARDS === "true";
@@ -16,9 +15,7 @@ export default function CheckoutPage({ accessKey }) {
   // Payment form states
   const [upiId, setUpiId] = useState("");
   const [upiVerified, setUpiVerified] = useState(false);
-  const [showQr, setShowQr] = useState(false);
-  const [qrCodeData, setQrCodeData] = useState("");
-  const [qrLoading, setQrLoading] = useState(false);
+
 
   const [selectedBank, setSelectedBank] = useState("");
   const [bankSearch, setBankSearch] = useState("");
@@ -135,12 +132,6 @@ export default function CheckoutPage({ accessKey }) {
             setStatusMessage(parsed.data || parsed.message || "Payment completed!");
             return;
           }
-          if (parsed && parsed.qr_link) {
-            setQrCodeData(parsed.qr_link);
-            setShowQr(true);
-            setStatus("idle");
-            return;
-          }
         } catch (e) {
           if (typeof rawResp === "string" && (rawResp.includes("<html") || rawResp.includes("action="))) {
             document.open(); document.write(rawResp); document.close();
@@ -168,24 +159,6 @@ export default function CheckoutPage({ accessKey }) {
       access_key: accessKey,
       payment_mode: "UPI",
       upi_id: upiId,
-    });
-  };
-
-  const generateSimulatedQr = () => {
-    setQrLoading(true);
-    setTimeout(() => {
-      // Create a nice simulated payment URL
-      const qrData = `upi://pay?pa=tippay@gateway&pn=TipPay&am=${session?.amount}&cu=INR&tn=${session?.txnid || session?.paymentId || session?.orderId || ""}`;
-      setQrCodeData(qrData);
-      setQrLoading(false);
-      setShowQr(true);
-    }, 600);
-  };
-
-  const handleQrPayConfirm = () => {
-    submitPayment({
-      access_key: accessKey,
-      payment_mode: "UPI",
     });
   };
 
@@ -302,7 +275,6 @@ export default function CheckoutPage({ accessKey }) {
             <button
               onClick={() => {
                 setStatus("idle");
-                setShowQr(false);
                 setUpiId("");
                 setSelectedBank("");
                 setCardData({ number: "", name: "", expiry: "", cvv: "" });
@@ -434,10 +406,7 @@ export default function CheckoutPage({ accessKey }) {
             {/* TAB CONTROLLERS */}
             <div className="grid grid-cols-3 gap-2 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800/80 mb-6">
               <button
-                onClick={() => {
-                  setActiveTab("upi");
-                  setShowQr(false);
-                }}
+                onClick={() => setActiveTab("upi")}
                 className={`py-2 px-1 text-xs font-semibold rounded-lg transition-all ${
                   activeTab === "upi"
                     ? "bg-slate-800 text-white shadow-md border border-slate-700/50"
@@ -474,99 +443,41 @@ export default function CheckoutPage({ accessKey }) {
               {/* UPI PAYMENTS FORM */}
               {activeTab === "upi" && (
                 <div className="space-y-6 animate-fade-in">
-                  {!showQr ? (
-                    <>
-                      <form onSubmit={handleUpiPay} className="space-y-4">
-                        <div>
-                          <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
-                            Enter UPI ID (VPA)
-                          </label>
-                          <div className="relative">
-                            <input
-                              type="text"
-                              value={upiId}
-                              onChange={(e) => setUpiId(e.target.value)}
-                              placeholder="username@bank"
-                              className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-violet-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none transition-all"
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setUpiVerified(!upiVerified)}
-                              className={`absolute right-3 top-2.5 px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${
-                                upiVerified
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                                  : "bg-slate-800 text-slate-400 hover:text-white"
-                              }`}
-                            >
-                              {upiVerified ? "Verified ✓" : "Verify"}
-                            </button>
-                          </div>
-                        </div>
-                        
-                        <button
-                          type="submit"
-                          className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 active:scale-[0.98] transition-all text-white font-semibold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/10"
-                        >
-                          Pay with UPI ID
-                        </button>
-                      </form>
-
-                      <div className="flex items-center gap-4 text-slate-600 my-4">
-                        <div className="h-[1px] bg-slate-800/80 flex-1"></div>
-                        <span className="text-[10px] uppercase font-black tracking-widest text-slate-500">Or</span>
-                        <div className="h-[1px] bg-slate-800/80 flex-1"></div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          submitPayment({
-                            access_key: accessKey,
-                            payment_mode: "UPI",
-                          });
-                        }}
-                        className="w-full py-3.5 bg-slate-950/80 hover:bg-slate-950 border border-slate-800/80 hover:border-slate-750 transition-all text-slate-200 font-semibold rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2"
-                      >
-                        📷 Generate Scan &amp; Pay QR
-                      </button>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="bg-white p-4 rounded-2xl shadow-lg border border-slate-200 relative overflow-hidden flex flex-col items-center gap-3">
-                        {qrCodeData ? (
-                          <QRCodeSVG value={qrCodeData} size={160} />
-                        ) : (
-                          <div className="w-40 h-40 bg-slate-100 flex items-center justify-center rounded-lg border border-slate-250">
-                            <span className="text-xs text-slate-400 font-medium">Generating QR...</span>
-                          </div>
-                        )}
-                        <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider">UPI Secure Dynamic QR</span>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold text-white">Scan this QR using Google Pay, PhonePe, or Paytm</p>
-                        <p className="text-[10px] text-slate-500">Generating dynamic verification socket...</p>
-                      </div>
-
-                      <div className="flex gap-3 w-full pt-2">
+                  <form onSubmit={handleUpiPay} className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                        Enter UPI ID (VPA)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={upiId}
+                          onChange={(e) => setUpiId(e.target.value)}
+                          placeholder="username@bank"
+                          className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-violet-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none transition-all"
+                          required
+                        />
                         <button
                           type="button"
-                          onClick={() => setShowQr(false)}
-                          className="flex-1 py-3 border border-slate-800 hover:border-slate-700 hover:bg-slate-950 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all"
+                          onClick={() => setUpiVerified(!upiVerified)}
+                          className={`absolute right-3 top-2.5 px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${
+                            upiVerified
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                              : "bg-slate-800 text-slate-400 hover:text-white"
+                          }`}
                         >
-                          Back
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleQrPayConfirm}
-                          className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all shadow-lg shadow-emerald-600/10 animate-pulse"
-                        >
-                          Confirm Paid ✓
+                          {upiVerified ? "Verified ✓" : "Verify"}
                         </button>
                       </div>
                     </div>
-                  )}
+                    
+                    <button
+                      type="submit"
+                      className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 active:scale-[0.98] transition-all text-white font-semibold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/10"
+                    >
+                      Pay with UPI ID
+                    </button>
+                  </form>
                 </div>
               )}
 
