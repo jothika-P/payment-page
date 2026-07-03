@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || window.location.origin;
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
@@ -22,21 +22,21 @@ export async function fetchSession(accessKey) {
 
   return await response.json();
 }
-export async function fetchSession(accessKey) {
-  const response = await fetch(`${API_BASE_URL}/api/payment/session/${accessKey}`, {
-    method: "GET",
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    }
-  });
+// export async function fetchSession(accessKey) {
+//   const response = await fetch(`${API_BASE_URL}/api/payment/session/${accessKey}`, {
+//     method: "GET",
+//     headers: {
+//       "Accept": "application/json",
+//       "Content-Type": "application/json"
+//     }
+//   });
 
-  if (!response.ok) {
-    throw new Error(`Session fetch failed with status ${response.status}`);
-  }
+//   if (!response.ok) {
+//     throw new Error(`Session fetch failed with status ${response.status}`);
+//   }
 
-  return await response.json();
-}
+//   return await response.json();
+// }
 
 export async function processPayment(payload) {
   const response = await fetch(`${API_BASE_URL}/api/payment/pay`, {
