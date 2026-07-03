@@ -317,7 +317,7 @@ export default function CheckoutPage({ accessKey }) {
                 T
               </div>
               <div>
-                <h1 className="text-base font-extrabold text-white tracking-tight leading-none">TipPay Hosted Gateway</h1>
+                <h1 className="text-base font-extrabold text-white tracking-tight leading-none">TpiPay Hosted Gateway</h1>
                 <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Secure Transaction Session</p>
               </div>
             </div>
