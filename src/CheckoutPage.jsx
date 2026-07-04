@@ -274,6 +274,10 @@ export default function CheckoutPage({ accessKey }) {
 
             <button
               onClick={() => {
+                if (isSuccess && session?.surl) {
+                  window.location.href = session.surl;
+                  return;
+                }
                 setStatus("idle");
                 setUpiId("");
                 setSelectedBank("");
