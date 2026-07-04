@@ -328,7 +328,7 @@ export default function CheckoutPage({ accessKey }) {
                 Merchant Checkout
               </span>
               <h2 className="text-xl font-bold text-slate-100 mt-4 leading-tight">
-                {session?.merchant_name || "TipPay Secure Commerce"}
+                {session?.merchant_name || "TpiPay Secure Commerce"}
               </h2>
               
               <div className="mt-6 space-y-1.5 border-t border-slate-800/60 pt-4">

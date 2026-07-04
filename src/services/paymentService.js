@@ -1,6 +1,6 @@
 // Use a relative path so requests always go to the current origin (e.g. localhost:5173) 
-// and trigger the Vite proxy to localhost:8080.
-const API_BASE_URL = "";
+// and trigger the Vite proxy to localhost:8080. In production, use the env variable.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export async function fetchSession(accessKey) {
   const response = await fetch(`${API_BASE_URL}/api/payment/session/${accessKey}`, {
